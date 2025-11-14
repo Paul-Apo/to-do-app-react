@@ -6,13 +6,18 @@ type Additions = {
   id: string;
   text: string;
 };
+
 function App() {
   const [userInput, setUserInput] = useState("");
   const [additions, setAdditions] = useState<Additions[]>([]);
+
   const handleClick = () => {
-    setAdditions([...additions, { id: crypto.randomUUID(), text: userInput }]);
-    setUserInput("");
+    if (userInput.trim()) {
+      setAdditions([...additions, { id: crypto.randomUUID(), text: userInput }]);
+      setUserInput("");
+    }
   };
+
   const handleClose = (id: string) => {
     setAdditions(additions.filter((a) => a.id !== id));
   };
@@ -23,21 +28,46 @@ function App() {
     );
   };
 
+  const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      handleClick();
+    }
+  };
+
   return (
-    <>
-      <label>Type your task here: </label>
-      <input type="text" onChange={(e) => setUserInput(e.target.value)} />
-      <button onClick={() => handleClick()}>➕</button>
-      {additions.map((a) => (
-        <Add
-          key={a.id}
-          id={a.id}
-          userInput={a.text}
-          onClose={() => handleClose(a.id)}
-          onEdit={handleEdit}
+    <div className="app-container">
+      <h1>📝 My Tasks</h1>
+      <div className="input-section">
+        <input
+          type="text"
+          value={userInput}
+          onChange={(e) => setUserInput(e.target.value)}
+          onKeyPress={handleKeyPress}
+          placeholder="Add a new task..."
         />
-      ))}
-    </>
+        <button className="add-button" onClick={handleClick}>
+          ➕ Add
+        </button>
+      </div>
+
+      {additions.length === 0 ? (
+        <div className="empty-state">
+          No tasks yet. Add one to get started! 🚀
+        </div>
+      ) : (
+        <div className="tasks-container">
+          {additions.map((a) => (
+            <Add
+              key={a.id}
+              id={a.id}
+              userInput={a.text}
+              onClose={() => handleClose(a.id)}
+              onEdit={handleEdit}
+            />
+          ))}
+        </div>
+      )}
+    </div>
   );
 }
 
